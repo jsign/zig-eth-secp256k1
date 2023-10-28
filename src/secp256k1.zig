@@ -3,8 +3,12 @@ const secp256k1lib = @cImport({
 });
 
 pub const Secp256k1 = struct {
-    pub fn init() Secp256k1 {
-        _ = secp256k1lib.secp256k1_context_create_sign_verify();
-        return .{};
+    context: *secp256k1lib.secp256k1_context,
+
+    pub fn init() !Secp256k1 {
+        var context = secp256k1lib.secp256k1_context_create_sign_verify() orelse return error.FailedInitialize;
+        return Secp256k1{
+            .context = context,
+        };
     }
 };
