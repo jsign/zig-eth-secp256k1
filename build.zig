@@ -1,36 +1,29 @@
 const std = @import("std");
 
-// Although this function looks imperative, note that its job is to
-// declaratively construct a build graph that will be executed by an external
-// runner.
 pub fn build(b: *std.Build) void {
-    // Standard target options allows the person running `zig build` to choose
-    // what target to build for. Here we do not override the defaults, which
-    // means any target is allowed, and the default is native. Other options
-    // for restricting supported target set are available.
     const target = b.standardTargetOptions(.{});
-
-    // Standard optimization options allow the person running `zig build` to select
-    // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall. Here we do not
-    // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
     const lib = b.addStaticLibrary(.{
         .name = "zig-eth-secp256k1",
-        // In this case the main source file is merely a path, however, in more
-        // complicated build scripts, this could be a generated file.
         .root_source_file = .{ .path = "src/main.zig" },
         .target = target,
         .optimize = optimize,
     });
+    lib.addIncludePath(.{ .path = "." });
+    lib.addIncludePath(.{ .path = "libsecp256k1" });
+    lib.addIncludePath(.{ .path = "libsecp256k1/src" });
+    lib.addCSourceFile(.{ .file = .{ .path = "libsecp256k1/src/secp256k1.c" }, .flags = &[0][]const u8{} });
+    lib.defineCMacro("USE_FIELD_10X26", "1");
+    lib.defineCMacro("USE_SCALAR_8X32", "1");
+    lib.defineCMacro("USE_ENDOMORPHISM", "1");
+    lib.defineCMacro("USE_NUM_NONE", "1");
+    lib.defineCMacro("USE_FIELD_INV_BUILTIN", "1");
+    lib.defineCMacro("USE_SCALAR_INV_BUILTIN", "1");
+    lib.linkLibC();
 
-    // This declares intent for the library to be installed into the standard
-    // location when the user invokes the "install" step (the default step when
-    // running `zig build`).
     b.installArtifact(lib);
 
-    // Creates a step for unit testing. This only builds the test executable
-    // but does not run it.
     const main_tests = b.addTest(.{
         .root_source_file = .{ .path = "src/main.zig" },
         .target = target,
@@ -39,9 +32,14 @@ pub fn build(b: *std.Build) void {
 
     const run_main_tests = b.addRunArtifact(main_tests);
 
-    // This creates a build step. It will be visible in the `zig build --help` menu,
-    // and can be selected like this: `zig build test`
-    // This will evaluate the `test` step rather than the default, which is "install".
     const test_step = b.step("test", "Run library tests");
     test_step.dependOn(&run_main_tests.step);
+
+    const run_cmd = b.addRunArtifact(lib);
+    run_cmd.step.dependOn(b.getInstallStep());
+    if (b.args) |args| {
+        run_cmd.addArgs(args);
+    }
+    const run_step = b.step("run", "Run the app");
+    run_step.dependOn(&run_cmd.step);
 }
