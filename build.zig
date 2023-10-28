@@ -4,6 +4,23 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const libsecp256k1 = b.addStaticLibrary(.{
+        .name = "secp256k1",
+        .target = target,
+        .optimize = optimize,
+    });
+    libsecp256k1.addIncludePath(.{ .path = "libsecp256k1" });
+    libsecp256k1.addIncludePath(.{ .path = "libsecp256k1/src" });
+    libsecp256k1.defineCMacro("USE_FIELD_10X26", "1");
+    libsecp256k1.defineCMacro("USE_SCALAR_8X32", "1");
+    libsecp256k1.defineCMacro("USE_ENDOMORPHISM", "1");
+    libsecp256k1.defineCMacro("USE_NUM_NONE", "1");
+    libsecp256k1.defineCMacro("USE_FIELD_INV_BUILTIN", "1");
+    libsecp256k1.defineCMacro("USE_SCALAR_INV_BUILTIN", "1");
+    libsecp256k1.addCSourceFile(.{ .file = .{ .path = "ext.c" }, .flags = &[0][]const u8{} });
+    libsecp256k1.linkLibC();
+    b.installArtifact(libsecp256k1);
+
     const exe = b.addExecutable(.{
         .name = "zig-eth-secp256k1",
         .root_source_file = .{ .path = "src/main.zig" },
@@ -12,15 +29,7 @@ pub fn build(b: *std.Build) void {
     });
     exe.addIncludePath(.{ .path = "." });
     exe.addIncludePath(.{ .path = "libsecp256k1" });
-    exe.addIncludePath(.{ .path = "libsecp256k1/src" });
-    exe.defineCMacro("USE_FIELD_10X26", "1");
-    exe.defineCMacro("USE_SCALAR_8X32", "1");
-    exe.defineCMacro("USE_ENDOMORPHISM", "1");
-    exe.defineCMacro("USE_NUM_NONE", "1");
-    exe.defineCMacro("USE_FIELD_INV_BUILTIN", "1");
-    exe.defineCMacro("USE_SCALAR_INV_BUILTIN", "1");
-    exe.addCSourceFile(.{ .file = .{ .path = "ext.c" }, .flags = &[0][]const u8{} });
-    exe.linkLibC();
+    exe.linkLibrary(libsecp256k1);
 
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
@@ -37,6 +46,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
+    main_tests.linkLibrary(libsecp256k1);
 
     const run_main_tests = b.addRunArtifact(main_tests);
 
