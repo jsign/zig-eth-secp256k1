@@ -46,6 +46,8 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
+    main_tests.addIncludePath(.{ .path = "." });
+    main_tests.addIncludePath(.{ .path = "libsecp256k1" });
     main_tests.linkLibrary(libsecp256k1);
 
     const run_main_tests = b.addRunArtifact(main_tests);
