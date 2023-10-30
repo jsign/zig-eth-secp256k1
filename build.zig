@@ -4,6 +4,7 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    // libsecp256k1 static C library.
     const libsecp256k1 = b.addStaticLibrary(.{
         .name = "secp256k1",
         .target = target,
@@ -21,6 +22,7 @@ pub fn build(b: *std.Build) void {
     libsecp256k1.linkLibC();
     b.installArtifact(libsecp256k1);
 
+    // Run command.
     const exe = b.addExecutable(.{
         .name = "zig-eth-secp256k1",
         .root_source_file = .{ .path = "src/main.zig" },
@@ -41,6 +43,7 @@ pub fn build(b: *std.Build) void {
 
     b.installArtifact(exe);
 
+    // Tests.
     const main_tests = b.addTest(.{
         .root_source_file = .{ .path = "src/main.zig" },
         .target = target,
@@ -54,4 +57,7 @@ pub fn build(b: *std.Build) void {
 
     const test_step = b.step("test", "Run library tests");
     test_step.dependOn(&run_main_tests.step);
+
+    // Exported modules.
+    _ = b.addModule("zig-eth-secp256k1", .{ .source_file = .{ .path = "src/sec256k1.zig" } });
 }
