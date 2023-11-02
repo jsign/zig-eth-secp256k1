@@ -10,7 +10,6 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    libsecp256k1.addIncludePath(.{ .path = "." });
     libsecp256k1.addIncludePath(.{ .path = "libsecp256k1" });
     libsecp256k1.addIncludePath(.{ .path = "libsecp256k1/src" });
     libsecp256k1.defineCMacro("USE_FIELD_10X26", "1");
