@@ -91,6 +91,14 @@ pub extern fn secp256k1_ec_privkey_tweak_mul(ctx: ?*const secp256k1_context, sec
 pub extern fn secp256k1_ec_pubkey_tweak_mul(ctx: ?*const secp256k1_context, pubkey: [*c]secp256k1_pubkey, tweak: [*c]const u8) c_int;
 pub extern fn secp256k1_context_randomize(ctx: ?*secp256k1_context, seed32: [*c]const u8) c_int;
 pub extern fn secp256k1_ec_pubkey_combine(ctx: ?*const secp256k1_context, out: [*c]secp256k1_pubkey, ins: [*c]const [*c]const secp256k1_pubkey, n: usize) c_int;
+pub const secp256k1_ecdsa_recoverable_signature = extern struct {
+    data: [65]u8,
+};
+pub extern fn secp256k1_ecdsa_recoverable_signature_parse_compact(ctx: ?*const secp256k1_context, sig: [*c]secp256k1_ecdsa_recoverable_signature, input64: [*c]const u8, recid: c_int) c_int;
+pub extern fn secp256k1_ecdsa_recoverable_signature_convert(ctx: ?*const secp256k1_context, sig: [*c]secp256k1_ecdsa_signature, sigin: [*c]const secp256k1_ecdsa_recoverable_signature) c_int;
+pub extern fn secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx: ?*const secp256k1_context, output64: [*c]u8, recid: [*c]c_int, sig: [*c]const secp256k1_ecdsa_recoverable_signature) c_int;
+pub extern fn secp256k1_ecdsa_sign_recoverable(ctx: ?*const secp256k1_context, sig: [*c]secp256k1_ecdsa_recoverable_signature, msg32: [*c]const u8, seckey: [*c]const u8, noncefp: secp256k1_nonce_function, ndata: ?*const anyopaque) c_int;
+pub extern fn secp256k1_ecdsa_recover(ctx: ?*const secp256k1_context, pubkey: [*c]secp256k1_pubkey, sig: [*c]const secp256k1_ecdsa_recoverable_signature, msg32: [*c]const u8) c_int;
 pub extern fn secp256k1_context_create_sign_verify() ?*secp256k1_context;
 pub extern fn secp256k1_ext_ecdsa_recover(ctx: ?*const secp256k1_context, pubkey_out: [*c]u8, sigdata: [*c]const u8, msgdata: [*c]const u8) c_int;
 pub extern fn secp256k1_ext_ecdsa_verify(ctx: ?*const secp256k1_context, sigdata: [*c]const u8, msgdata: [*c]const u8, pubkeydata: [*c]const u8, pubkeylen: usize) c_int;
@@ -538,4 +546,5 @@ pub const SECP256K1_CONTEXT_SIGN = SECP256K1_FLAGS_TYPE_CONTEXT | SECP256K1_FLAG
 pub const SECP256K1_CONTEXT_NONE = SECP256K1_FLAGS_TYPE_CONTEXT;
 pub const SECP256K1_EC_COMPRESSED = SECP256K1_FLAGS_TYPE_COMPRESSION | SECP256K1_FLAGS_BIT_COMPRESSION;
 pub const SECP256K1_EC_UNCOMPRESSED = SECP256K1_FLAGS_TYPE_COMPRESSION;
+pub const _SECP256K1_RECOVERY_ = "";
 pub const secp256k1_context_struct = struct_secp256k1_context_struct;
