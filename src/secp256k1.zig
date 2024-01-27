@@ -12,6 +12,8 @@ pub const Signature = [65]u8;
 pub const Message = [32]u8;
 
 pub const Secp256k1 = struct {
+    pub const order: u256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141;
+
     context: *secp256k1lib.secp256k1_context,
 
     pub fn init() !Secp256k1 {
