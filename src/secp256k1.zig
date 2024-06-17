@@ -17,14 +17,14 @@ pub const Secp256k1 = struct {
     context: *secp256k1lib.secp256k1_context,
 
     pub fn init() !Secp256k1 {
-        var context = secp256k1lib.secp256k1_context_create_sign_verify() orelse return error.FailedInitialize;
+        const context = secp256k1lib.secp256k1_context_create_sign_verify() orelse return error.FailedInitialize;
         return Secp256k1{
             .context = context,
         };
     }
 
     pub fn generate_keypair(self: Secp256k1) !struct { pubkey: PublicKey, privkey: PrivateKey } {
-        const privkey = std.crypto.ecc.Secp256k1.scalar.random(std.builtin.Endian.Big);
+        const privkey = std.crypto.ecc.Secp256k1.scalar.random(std.builtin.Endian.big);
         var ecpubkey: secp256k1lib.secp256k1_pubkey = undefined;
         if (secp256k1lib.secp256k1_ec_pubkey_create(self.context, &ecpubkey, &privkey) == 0) {
             return error.ErrCalculatingPubkeyFromPrivkey;
@@ -94,7 +94,7 @@ test "recover pubkey" {
 
 test "sign and recover" {
     var s = try Secp256k1.init();
-    var keypair = try s.generate_keypair();
+    const keypair = try s.generate_keypair();
 
     var msg: [32]u8 = undefined;
     std.crypto.random.bytes(&msg);
