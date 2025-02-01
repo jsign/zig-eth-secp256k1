@@ -12,13 +12,15 @@ pub fn build(b: *std.Build) void {
     });
     libsecp256k1.addIncludePath(b.path("libsecp256k1"));
     libsecp256k1.addIncludePath(b.path("libsecp256k1/src"));
-    libsecp256k1.defineCMacro("USE_FIELD_10X26", "1");
-    libsecp256k1.defineCMacro("USE_SCALAR_8X32", "1");
-    libsecp256k1.defineCMacro("USE_ENDOMORPHISM", "1");
-    libsecp256k1.defineCMacro("USE_NUM_NONE", "1");
-    libsecp256k1.defineCMacro("USE_FIELD_INV_BUILTIN", "1");
-    libsecp256k1.defineCMacro("USE_SCALAR_INV_BUILTIN", "1");
-    libsecp256k1.addCSourceFile(.{ .file = b.path("ext.c"), .flags = &[0][]const u8{} });
+    const cflags = .{
+        "-DUSE_FIELD_10X26=1",
+        "-DUSE_SCALAR_8X32=1",
+        "-DUSE_ENDOMORPHISM=1",
+        "-DUSE_NUM_NONE=1",
+        "-DUSE_FIELD_INV_BUILTIN=1",
+        "-DUSE_SCALAR_INV_BUILTIN=1",
+    };
+    libsecp256k1.addCSourceFile(.{ .file = b.path("ext.c"), .flags = &cflags });
     libsecp256k1.linkLibC();
     b.installArtifact(libsecp256k1);
 
