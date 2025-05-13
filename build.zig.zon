@@ -1,5 +1,6 @@
 .{
-    .name = "zig-eth-secp256k1",
+    .name = .zig_eth_secp256k1,
+    .fingerprint = 0x4e09ed55b07b4ffd,
     .version = "0.1.0",
     .paths = .{""},
 }
