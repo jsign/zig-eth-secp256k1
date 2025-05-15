@@ -2,5 +2,11 @@
     .name = .zig_eth_secp256k1,
     .fingerprint = 0x4e09ed55b07b4ffd,
     .version = "0.1.0",
+    .dependencies = .{
+        .zeptolibc = .{
+            .url = "git+https://github.com/ringtailsoftware/zeptolibc.git#6f3caa2099635130856abc484b0f3fd7a281d36d",
+            .hash = "zeptolibc-0.0.1-AAAAAFg3AAAqfBAKI0rQQtTh7ac44EZSobIN3FCu1SmV",
+        },
+    },
     .paths = .{""},
 }
