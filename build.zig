@@ -27,7 +27,6 @@ pub fn build(b: *std.Build) void {
     });
 
     if (target.query.os_tag == .freestanding) {
-        // libsecp256k1.root_module.addImport("zeptolibc", zeptolibc_dep.module("zeptolibc"));
         libsecp256k1.addIncludePath(zeptolibc_dep.path("include"));
     } else {
         libsecp256k1.linkLibC();
