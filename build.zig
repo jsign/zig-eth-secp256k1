@@ -5,10 +5,13 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     // libsecp256k1 static C library.
-    const libsecp256k1 = b.addStaticLibrary(.{
+    const libsecp256k1 = b.addLibrary(.{
         .name = "secp256k1",
-        .target = target,
-        .optimize = optimize,
+        .linkage = .static,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     libsecp256k1.addIncludePath(b.path("libsecp256k1"));
     libsecp256k1.addIncludePath(b.path("libsecp256k1/src"));
@@ -27,12 +30,14 @@ pub fn build(b: *std.Build) void {
     // Run command.
     const exe = b.addExecutable(.{
         .name = "zig-eth-secp256k1",
-        .root_source_file = b.path("src/main.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
-    exe.addIncludePath(b.path("."));
-    exe.addIncludePath(b.path("libsecp256k1"));
+    exe.root_module.addIncludePath(b.path("."));
+    exe.root_module.addIncludePath(b.path("libsecp256k1"));
     exe.linkLibrary(libsecp256k1);
 
     const run_cmd = b.addRunArtifact(exe);
@@ -47,12 +52,14 @@ pub fn build(b: *std.Build) void {
 
     // Tests.
     const main_tests = b.addTest(.{
-        .root_source_file = b.path("src/main.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
-    main_tests.addIncludePath(b.path("."));
-    main_tests.addIncludePath(b.path("libsecp256k1"));
+    main_tests.root_module.addIncludePath(b.path("."));
+    main_tests.root_module.addIncludePath(b.path("libsecp256k1"));
     main_tests.linkLibrary(libsecp256k1);
 
     const run_main_tests = b.addRunArtifact(main_tests);
@@ -61,5 +68,9 @@ pub fn build(b: *std.Build) void {
     test_step.dependOn(&run_main_tests.step);
 
     // Exported modules.
-    _ = b.addModule("zig-eth-secp256k1", .{ .root_source_file = b.path("src/secp256k1.zig") });
+    _ = b.addModule("zig-eth-secp256k1", .{
+        .root_source_file = b.path("src/secp256k1.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
 }
