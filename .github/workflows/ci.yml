@@ -2,38 +2,44 @@ name: CI
 on:
   push:
     branches: [ main ]
-  pull_request:    
+  pull_request:
   workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Zig
-      uses: korandoru/setup-zig@v1
+    - uses: actions/checkout@v4
       with:
-        zig-version: 0.14.0
+        submodules: recursive
+    - name: Set up Zig
+      uses: mlugg/setup-zig@v2
+      with:
+        version: 0.15.2
     - name: Build
       run: zig build
 
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Zig
-      uses: korandoru/setup-zig@v1
+    - uses: actions/checkout@v4
       with:
-        zig-version: 0.14.0
+        submodules: recursive
+    - name: Set up Zig
+      uses: mlugg/setup-zig@v2
+      with:
+        version: 0.15.2
     - name: Lint
       run: zig fmt --check src/*.zig
 
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Zig
-      uses: korandoru/setup-zig@v1
+    - uses: actions/checkout@v4
       with:
-        zig-version: 0.14.0
+        submodules: recursive
+    - name: Set up Zig
+      uses: mlugg/setup-zig@v2
+      with:
+        version: 0.15.2
     - name: Test
       run: zig build test
