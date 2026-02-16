@@ -1,6 +1,6 @@
 .{
-    .name = .zig_eth_secp256k1,
-    .fingerprint = 0x4e09ed55b07b4ffd,
+    .name = .zigsecp256k1,
     .version = "0.1.0",
+    .fingerprint = 0xa676da390469da19,
     .paths = .{""},
 }
