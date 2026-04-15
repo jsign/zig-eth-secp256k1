@@ -23,8 +23,8 @@ pub const Secp256k1 = struct {
         };
     }
 
-    pub fn generate_keypair(self: Secp256k1) !struct { pubkey: PublicKey, privkey: PrivateKey } {
-        const privkey = std.crypto.ecc.Secp256k1.scalar.random(std.builtin.Endian.big);
+    pub fn generate_keypair(self: Secp256k1, io: std.Io) !struct { pubkey: PublicKey, privkey: PrivateKey } {
+        const privkey = std.crypto.ecc.Secp256k1.scalar.random(io, std.builtin.Endian.big);
         var ecpubkey: secp256k1lib.secp256k1_pubkey = undefined;
         if (secp256k1lib.secp256k1_ec_pubkey_create(self.context, &ecpubkey, &privkey) == 0) {
             return error.ErrCalculatingPubkeyFromPrivkey;
@@ -94,10 +94,13 @@ test "recover pubkey" {
 
 test "sign and recover" {
     var s = try Secp256k1.init();
-    const keypair = try s.generate_keypair();
+    var allocator: std.heap.DebugAllocator(.{}) = .init;
+    var threaded = std.Io.Threaded.init(allocator.allocator(), .{});
+    const io = threaded.io();
+    const keypair = try s.generate_keypair(io);
 
     var msg: [32]u8 = undefined;
-    std.crypto.random.bytes(&msg);
+    io.random(&msg);
 
     const sig = try s.sign(msg, keypair.privkey);
     const got_pubkey = try s.recoverPubkey(msg, sig);
