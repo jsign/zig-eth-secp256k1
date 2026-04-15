@@ -13,8 +13,8 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
-    libsecp256k1.addIncludePath(b.path("libsecp256k1"));
-    libsecp256k1.addIncludePath(b.path("libsecp256k1/src"));
+    libsecp256k1.root_module.addIncludePath(b.path("libsecp256k1"));
+    libsecp256k1.root_module.addIncludePath(b.path("libsecp256k1/src"));
     const cflags = .{
         "-DUSE_FIELD_10X26=1",
         "-DUSE_SCALAR_8X32=1",
@@ -23,8 +23,8 @@ pub fn build(b: *std.Build) void {
         "-DUSE_FIELD_INV_BUILTIN=1",
         "-DUSE_SCALAR_INV_BUILTIN=1",
     };
-    libsecp256k1.addCSourceFile(.{ .file = b.path("ext.c"), .flags = &cflags });
-    libsecp256k1.linkLibC();
+    libsecp256k1.root_module.addCSourceFile(.{ .file = b.path("ext.c"), .flags = &cflags });
+    libsecp256k1.root_module.link_libc = true;
     b.installArtifact(libsecp256k1);
 
     // Run command.
@@ -38,7 +38,7 @@ pub fn build(b: *std.Build) void {
     });
     exe.root_module.addIncludePath(b.path("."));
     exe.root_module.addIncludePath(b.path("libsecp256k1"));
-    exe.linkLibrary(libsecp256k1);
+    exe.root_module.linkLibrary(libsecp256k1);
 
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
@@ -60,7 +60,7 @@ pub fn build(b: *std.Build) void {
     });
     main_tests.root_module.addIncludePath(b.path("."));
     main_tests.root_module.addIncludePath(b.path("libsecp256k1"));
-    main_tests.linkLibrary(libsecp256k1);
+    main_tests.root_module.linkLibrary(libsecp256k1);
 
     const run_main_tests = b.addRunArtifact(main_tests);
 
