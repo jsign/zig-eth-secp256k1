@@ -5,7 +5,7 @@
 // This file is a port of go-ethereum/crypto/secp256k1/secp256k1.go with some slight modifications.
 
 const std = @import("std");
-const secp256k1lib = @import("dcimport.zig");
+const secp256k1lib = @import("secp256k1_c");
 pub const PrivateKey = [32]u8;
 pub const PublicKey = [65]u8;
 pub const Signature = [65]u8;

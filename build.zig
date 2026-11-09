@@ -33,6 +33,14 @@ pub fn build(b: *std.Build) void {
     libsecp256k1.root_module.link_libc = true;
     b.installArtifact(libsecp256k1);
 
+    const bindings = b.addTranslateC(.{
+        .root_source_file = b.path("ext.h"),
+        .target = target,
+        .optimize = optimize,
+    });
+    bindings.addIncludePath(upstream.path(""));
+    const bindings_mod = bindings.createModule();
+
     // Run command.
     const exe = b.addExecutable(.{
         .name = "zig-eth-secp256k1",
@@ -42,6 +50,7 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
+    exe.root_module.addImport("secp256k1_c", bindings_mod);
     exe.root_module.linkLibrary(libsecp256k1);
 
     const run_cmd = b.addRunArtifact(exe);
@@ -60,6 +69,7 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
+    main_tests.root_module.addImport("secp256k1_c", bindings_mod);
     main_tests.root_module.linkLibrary(libsecp256k1);
 
     const run_main_tests = b.addRunArtifact(main_tests);
@@ -72,5 +82,6 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/secp256k1.zig"),
         .target = target,
         .optimize = optimize,
+        .imports = &.{.{ .name = "secp256k1_c", .module = bindings_mod }},
     });
 }
