@@ -5,6 +5,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     // libsecp256k1 static C library.
+    const upstream = b.dependency("libsecp256k1", .{});
     const libsecp256k1 = b.addLibrary(.{
         .name = "secp256k1",
         .linkage = .static,
@@ -13,17 +14,22 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
-    libsecp256k1.root_module.addIncludePath(b.path("libsecp256k1"));
-    libsecp256k1.root_module.addIncludePath(b.path("libsecp256k1/src"));
-    const cflags = .{
-        "-DUSE_FIELD_10X26=1",
-        "-DUSE_SCALAR_8X32=1",
-        "-DUSE_ENDOMORPHISM=1",
-        "-DUSE_NUM_NONE=1",
-        "-DUSE_FIELD_INV_BUILTIN=1",
-        "-DUSE_SCALAR_INV_BUILTIN=1",
+    libsecp256k1.root_module.addIncludePath(upstream.path(""));
+    libsecp256k1.root_module.addIncludePath(upstream.path("src"));
+    const common_flags = [_][]const u8{
+        "-DENABLE_MODULE_RECOVERY=1",
+        "-DECMULT_WINDOW_SIZE=15",
+        "-DCOMB_BLOCKS=43",
+        "-DCOMB_TEETH=6",
     };
-    libsecp256k1.root_module.addCSourceFile(.{ .file = b.path("ext.c"), .flags = &cflags });
+    const asm_flags = [_][]const u8{"-DUSE_ASM_X86_64=1"};
+    const cflags: []const []const u8 = if (target.result.cpu.arch == .x86_64) &(common_flags ++ asm_flags) else &common_flags;
+    libsecp256k1.root_module.addCSourceFile(.{ .file = b.path("ext.c"), .flags = cflags });
+    libsecp256k1.root_module.addCSourceFiles(.{
+        .root = upstream.path("src"),
+        .files = &.{ "precomputed_ecmult.c", "precomputed_ecmult_gen.c" },
+        .flags = cflags,
+    });
     libsecp256k1.root_module.link_libc = true;
     b.installArtifact(libsecp256k1);
 
@@ -36,8 +42,6 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
-    exe.root_module.addIncludePath(b.path("."));
-    exe.root_module.addIncludePath(b.path("libsecp256k1"));
     exe.root_module.linkLibrary(libsecp256k1);
 
     const run_cmd = b.addRunArtifact(exe);
@@ -56,8 +60,6 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
-    main_tests.root_module.addIncludePath(b.path("."));
-    main_tests.root_module.addIncludePath(b.path("libsecp256k1"));
     main_tests.root_module.linkLibrary(libsecp256k1);
 
     const run_main_tests = b.addRunArtifact(main_tests);
