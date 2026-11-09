@@ -6,7 +6,7 @@
 // the LICENSE file.
 
 // secp256k1_context_create_sign_verify creates a context for signing and signature verification.
-static secp256k1_context *secp256k1_context_create_sign_verify();
+secp256k1_context *secp256k1_context_create_sign_verify(void);
 
 // secp256k1_ext_ecdsa_recover recovers the public key of an encoded compact signature.
 //
@@ -16,7 +16,7 @@ static secp256k1_context *secp256k1_context_create_sign_verify();
 //  Out:    pubkey_out: the serialized 65-byte public key of the signer (cannot be NULL)
 //  In:     sigdata:    pointer to a 65-byte signature with the recovery id at the end (cannot be NULL)
 //          msgdata:    pointer to a 32-byte message (cannot be NULL)
-static int secp256k1_ext_ecdsa_recover(
+int secp256k1_ext_ecdsa_recover(
 	const secp256k1_context *ctx,
 	unsigned char *pubkey_out,
 	const unsigned char *sigdata,
@@ -31,7 +31,7 @@ static int secp256k1_ext_ecdsa_recover(
 //          msgdata:    pointer to a 32-byte message (cannot be NULL)
 //          pubkeydata: pointer to public key data (cannot be NULL)
 //          pubkeylen:  length of pubkeydata
-static int secp256k1_ext_ecdsa_verify(
+int secp256k1_ext_ecdsa_verify(
 	const secp256k1_context *ctx,
 	const unsigned char *sigdata,
 	const unsigned char *msgdata,
@@ -49,7 +49,7 @@ static int secp256k1_ext_ecdsa_verify(
 //  In:     outlen:     length of out (33 for compressed keys, 65 for uncompressed keys)
 //          pubkeydata: the input public key (cannot be NULL)
 //          pubkeylen:  length of pubkeydata
-static int secp256k1_ext_reencode_pubkey(
+int secp256k1_ext_reencode_pubkey(
 	const secp256k1_context *ctx,
 	unsigned char *out,
 	size_t outlen,

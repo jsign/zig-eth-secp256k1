@@ -2,5 +2,11 @@
     .name = .zig_eth_secp256k1,
     .fingerprint = 0x4e09ed55b07b4ffd,
     .version = "0.1.0",
+    .dependencies = .{
+        .libsecp256k1 = .{
+            .url = "git+https://github.com/bitcoin-core/secp256k1?ref=v0.8.0#6e2c8bc4ecdc6e71dbe7a368f360d8d453ce435d",
+            .hash = "N-V-__8AAFwQbQAc-L8ZUw4rqyk_OWdYX4-V8crqiWlJ1dhl",
+        },
+    },
     .paths = .{""},
 }

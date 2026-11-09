@@ -1,6 +1,4 @@
-#include "include/secp256k1_recovery.h"
 #include "secp256k1.c"
-#include "modules/recovery/main_impl.h"
 
 // Copyright 2015 Jeffrey Wilcke, Felix Lange, Gustav Simonsson. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be found in
@@ -9,7 +7,7 @@
 // secp256k1_context_create_sign_verify creates a context for signing and signature verification.
 secp256k1_context *secp256k1_context_create_sign_verify()
 {
-    return secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
+    return secp256k1_context_create(SECP256K1_CONTEXT_NONE);
 }
 
 // secp256k1_ext_ecdsa_recover recovers the public key of an encoded compact signature.
@@ -120,8 +118,8 @@ int secp256k1_ext_scalar_mul(const secp256k1_context *ctx, unsigned char *point,
     ARG_CHECK(scalar != NULL);
     (void)ctx;
 
-    secp256k1_fe_set_b32(&feX, point);
-    secp256k1_fe_set_b32(&feY, point + 32);
+    secp256k1_fe_set_b32_mod(&feX, point);
+    secp256k1_fe_set_b32_mod(&feY, point + 32);
     secp256k1_ge_set_xy(&ge, &feX, &feY);
     secp256k1_scalar_set_b32(&s, scalar, &overflow);
     if (overflow || secp256k1_scalar_is_zero(&s))
